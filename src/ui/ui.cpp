@@ -2,6 +2,7 @@
 
 #include "../state/configuration.h"
 #include "driver/display.h"
+#include "state/terminal/state.h"
 
 namespace oww::ui {
 using namespace config::ui;
@@ -48,6 +49,8 @@ os_thread_return_t UserInterface::UserInterfaceThread() {
 
   while (true) {
     UpdateGui();
+    UpdateBuzzer();
+    UpdateLed();
     display->RenderLoop();
   }
 }
@@ -77,5 +80,46 @@ void UserInterface::UpdateGui() {
     tag_status_->Render();
   }
 }
+
+void UserInterface::UpdateBuzzer() {
+  auto current_state = state_->GetTerminalState();
+
+  // logger.error("UpdateBuzzer");
+
+  if (last_buzz_state_id_ != static_cast<void *>(current_state.get())) {
+    using namespace oww::state::terminal;
+
+    int frequency = 0;
+
+    std::visit(overloaded{
+                   [&](Idle state) {},
+                   [&](Detected state) { frequency = 440; },
+                   [&](Authenticated state) { frequency = 660; },
+                   [&](StartSession state) {},
+                   [&](Unknown state) { frequency = 370; },
+                   [&](Personalize state) {},
+
+               },
+               *(current_state.get()));
+
+    if (frequency > 0) {
+      logger.error("Buzzing with frequency %d", frequency);
+
+      analogWrite(buzzer::pin_out, 128, frequency);
+      buzz_timeout = millis() + 2000;
+    }
+
+    last_buzz_state_id_ = static_cast<void *>(current_state.get());
+  }
+
+  if (buzz_timeout != CONCURRENT_WAIT_FOREVER && buzz_timeout < millis()) {
+    logger.error("Stopping buzzer");
+
+    analogWrite(buzzer::pin_out, 0, 0);
+    buzz_timeout = CONCURRENT_WAIT_FOREVER;
+  }
+}
+
+void UserInterface::UpdateLed() {}
 
 }  // namespace oww::ui

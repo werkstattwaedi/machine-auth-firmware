@@ -29,12 +29,22 @@ constexpr int8_t pin_touch_chipselect = S3;
 constexpr int8_t pin_touch_irq = S4;
 }  // namespace display
 
+namespace buzzer {
+
+constexpr int8_t pin_out = D16;
+}  // namespace buzzer
+
+namespace led {
+
+constexpr int8_t pin_out = D16;
+}  // namespace buzzer
+
 }  // namespace ui
 
 namespace nfc {
 
-constexpr int8_t pin_irq = D17;
-constexpr int8_t pin_reset = D15;
+// constexpr int8_t pin_irq = D17;
+constexpr int8_t pin_reset = D12;
 
 constexpr os_thread_prio_t thread_priority = OS_THREAD_PRIORITY_DEFAULT;
 constexpr size_t thread_stack_size = OS_THREAD_STACK_SIZE_DEFAULT_HIGH;

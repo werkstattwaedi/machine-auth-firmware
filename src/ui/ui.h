@@ -9,6 +9,7 @@
 #include "state/state.h"
 #include "statusbar.h"
 
+
 namespace oww::ui {
 
 enum class Error : int {
@@ -63,6 +64,13 @@ class UserInterface {
   os_thread_return_t UserInterfaceThread();
 
   void UpdateGui();
+
+  system_tick_t buzz_timeout = CONCURRENT_WAIT_FOREVER;
+  void* last_buzz_state_id_ = nullptr;
+
+
+  void UpdateBuzzer();
+  void UpdateLed();
 
  private:
   std::unique_ptr<SplashScreen> splash_screen_ = nullptr;
